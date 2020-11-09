@@ -1,0 +1,5 @@
+com/bretgibson/spotifystats/config/WebConfig.class
+com/bretgibson/spotifystats/service/AuthorizationService.class
+com/bretgibson/spotifystats/Keys.class
+com/bretgibson/spotifystats/controller/AppController.class
+com/bretgibson/spotifystats/SpotifystatsApplication.class
