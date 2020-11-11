@@ -1,7 +1,6 @@
 package com.bretgibson.spotifystats.controller;
 
 import com.bretgibson.spotifystats.Keys;
-import com.bretgibson.spotifystats.service.AuthorizationService;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.SpotifyHttpManager;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
@@ -11,19 +10,24 @@ import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
+import org.apache.hc.core5.http.ParseException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.URI;
 
-//@CrossOrigin(origins = "http://localhost:3000/")
 @RestController
-@RequestMapping("api/")
-public class AppController {
+@RequestMapping("/api")
+public class AuthController {
 
-    AuthorizationService authorizationService = new AuthorizationService();
-
-    private static final URI redirectUri = SpotifyHttpManager.makeUri("http://localhost:8080/api/user_code/");
+    private static final URI redirectUri = SpotifyHttpManager.makeUri("http://localhost:8080/api/get-user-code/");
     private String code = "";
 
     private static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
@@ -32,23 +36,19 @@ public class AppController {
             .setRedirectUri(redirectUri)
             .build();
 
-
     @GetMapping("login")
     @ResponseBody
-    public String spotifyLogin(){
+    public String spotifyLogin(HttpServletResponse response) {
             AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
-//          .state("x4xkmn9pu3j6ukrs8n")
-          .scope("user-read-private, user-read-email, user-top-read")
-          .show_dialog(true)
-            .build();
+                    .scope("user-read-private, user-read-email, user-top-read")
+                    .show_dialog(true)
+                    .build();
         final URI uri = authorizationCodeUriRequest.execute();
-        System.out.println("URI: " + uri.toString());
         return uri.toString();
-//        AuthorizationService.authorizationCodeUri_Sync();
     }
 
-    @GetMapping(value = "user_code")
-    public Artist[] getSpotifyUserCode(@RequestParam("code") String userCode) {
+    @GetMapping(value = "get-user-code")
+    public String getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
         code = userCode;
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code)
                 .build();
@@ -65,22 +65,27 @@ public class AppController {
             System.out.println("Error: " + e.getMessage());
         }
 
-        final GetUsersTopArtistsRequest getUsersTopArtistsRequest = spotifyApi.getUsersTopArtists().time_range("medium_term").limit(10).offset(5).build();
+        response.sendRedirect("http://localhost:3000/top-artists");
+        return spotifyApi.getAccessToken();
+    }
+
+    @GetMapping(value = "user-top-artists")
+    public Artist[] getUserTopArtists() {
+
+        final GetUsersTopArtistsRequest getUsersTopArtistsRequest = spotifyApi.getUsersTopArtists()
+                .time_range("medium_term")
+                .limit(10)
+                .offset(5)
+                .build();
 
         try {
-            // Execute the request synchronous
             final Paging<Artist> artistPaging = getUsersTopArtistsRequest.execute();
 
-            // Print something's name
+            // return top artists as JSON
             return artistPaging.getItems();
         } catch (Exception e) {
             System.out.println("Something went wrong!\n" + e.getMessage());
         }
-//        AuthorizationService.authorizationCode_Sync();
-
-//        authorizationService.setCode(code);
-//        System.out.println(authorizationService.getCode());
-//        authorizationService.authorizationCode_Sync();
         return new Artist[0];
     }
 }
