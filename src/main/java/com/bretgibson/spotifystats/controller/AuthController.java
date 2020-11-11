@@ -10,17 +10,10 @@ import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
-import org.apache.hc.core5.http.ParseException;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
 import java.net.URI;
 
 @RestController
