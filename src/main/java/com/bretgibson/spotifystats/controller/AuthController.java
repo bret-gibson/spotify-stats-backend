@@ -21,9 +21,9 @@ import java.net.URI;
 public class AuthController {
 
     private static final URI redirectUri = SpotifyHttpManager.makeUri("http://localhost:8080/api/get-user-code/");
-    private String code = "";
+    public String code = "";
 
-    private static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
+    public static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
             .setClientId(Keys.CLIENT_ID.getKey())
             .setClientSecret(Keys.CLIENT_SECRET.getKey())
             .setRedirectUri(redirectUri)
@@ -31,7 +31,7 @@ public class AuthController {
 
     @GetMapping("login")
     @ResponseBody
-    public String spotifyLogin(HttpServletResponse response) {
+    public String spotifyLogin() {
             AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
                     .scope("user-read-private, user-read-email, user-top-read")
                     .show_dialog(true)
@@ -41,7 +41,7 @@ public class AuthController {
     }
 
     @GetMapping(value = "get-user-code")
-    public String getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
+    public void getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
         code = userCode;
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code)
                 .build();
@@ -57,28 +57,8 @@ public class AuthController {
         } catch (IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
             System.out.println("Error: " + e.getMessage());
         }
-
+        System.out.println(spotifyApi.getAccessToken());
         response.sendRedirect("http://localhost:3000/top-artists");
-        return spotifyApi.getAccessToken();
-    }
-
-    @GetMapping(value = "user-top-artists")
-    public Artist[] getUserTopArtists() {
-
-        final GetUsersTopArtistsRequest getUsersTopArtistsRequest = spotifyApi.getUsersTopArtists()
-                .time_range("medium_term")
-                .limit(10)
-                .offset(5)
-                .build();
-
-        try {
-            final Paging<Artist> artistPaging = getUsersTopArtistsRequest.execute();
-
-            // return top artists as JSON
-            return artistPaging.getItems();
-        } catch (Exception e) {
-            System.out.println("Something went wrong!\n" + e.getMessage());
-        }
-        return new Artist[0];
+//        return spotifyApi.getAccessToken();
     }
 }
