@@ -8,6 +8,7 @@ import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Track;
 import com.wrapper.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
 import com.wrapper.spotify.requests.data.personalization.simplified.GetUsersTopTracksRequest;
+import com.wrapper.spotify.requests.data.playlists.GetListOfUsersPlaylistsRequest;
 import com.wrapper.spotify.requests.data.tracks.GetAudioAnalysisForTrackRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,6 +62,25 @@ public class SpotifyApiController {
         }
         return new Track[0];
     }
+
+
+    @GetMapping(value = "user-playlists")
+    public Track[] getUserPlaylists() {
+
+        final GetListOfUsersPlaylistsRequestRequest getListOfUsersPlaylistsRequestRequest = spotifyApi.getListOfUsersPlaylists();
+
+        try {
+
+            final Paging<Track> trackPaging = getListOfUsersPlaylistsRequestRequest.execute();
+
+            // return Playlists as JSON
+            return playlistPaging.getItems();
+        } catch (Exception e) {
+            System.out.println("Something went wrong!\n" + e.getMessage());
+        }
+        return new Playlist[0];
+    }
+
 
     public static void getAudioAnalysisForTrack(String id) {
 
