@@ -6,10 +6,12 @@ import com.wrapper.spotify.model_objects.miscellaneous.AudioAnalysis;
 import com.wrapper.spotify.model_objects.specification.Artist;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Track;
+import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
 import com.wrapper.spotify.requests.data.personalization.simplified.GetUsersTopTracksRequest;
 import com.wrapper.spotify.requests.data.playlists.GetListOfUsersPlaylistsRequest;
 import com.wrapper.spotify.requests.data.tracks.GetAudioAnalysisForTrackRequest;
+import com.wrapper.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,6 +94,18 @@ public class SpotifyApiController {
 
             System.out.println("Track duration: " + audioAnalysis.getTrack().getDuration());
         } catch (IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void getCurrentUsersProfile_Sync() {
+        final GetCurrentUsersProfileRequest getCurrentUsersProfileRequest = spotifyApi.getCurrentUsersProfile()
+                .build();
+        try {
+            final User user = getCurrentUsersProfileRequest.execute();
+
+            System.out.println("Display name: " + user.getDisplayName());
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
